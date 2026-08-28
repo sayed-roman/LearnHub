@@ -1,0 +1,33 @@
+{
+  "kind": "collectionType",
+  "collectionName": "quiz_submissions",
+  "info": {
+    "singularName": "quiz-submission",
+    "pluralName": "quiz-submissions",
+    "displayName": "QuizSubmission"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "student": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "plugin::users-permissions.user",
+      "inversedBy": "quiz_submissions"
+    },
+    "quiz": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::quiz.quiz",
+      "inversedBy": "quiz_submissions"
+    },
+    "score": {
+      "type": "integer"
+    },
+    "submittedAt": {
+      "type": "datetime"
+    }
+  }
+}
