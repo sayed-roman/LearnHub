@@ -40,6 +40,9 @@
       "relation": "oneToMany",
       "target": "api::quiz.quiz",
       "mappedBy": "course"
+    },
+    "coverImageUrl": {
+      "type": "string"
     }
   }
 }
