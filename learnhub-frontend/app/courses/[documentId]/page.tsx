@@ -1,7 +1,5 @@
 "use client";
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { getCourse, enrollInCourse, getMyEnrollments } from "@/lib/api";
@@ -30,11 +28,7 @@ export default function CourseDetailsPage() {
         setCourse(c);
 
         if (user && token && user.role?.name === "Student") {
-          const enrollments = await getMyEnrollments(
-            token,
-            user.documentId ?? String(user.id),
-            user.id
-          );
+          const enrollments = await getMyEnrollments(token, user.id);
           const isEnrolled = enrollments.some(
             (e: any) => e.course?.documentId === documentId
           );
@@ -58,7 +52,7 @@ export default function CourseDetailsPage() {
     setEnrolling(true);
     setMessage("");
     try {
-      await enrollInCourse(token, documentId, user.documentId ?? user.id);
+      await enrollInCourse(token, documentId, user.id);
       setEnrolled(true);
       setMessage("Successfully enrolled!");
     } catch (err: any) {

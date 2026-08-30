@@ -1,7 +1,5 @@
 "use client";
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import RequireAuth from "@/components/RequireAuth";
@@ -21,9 +19,9 @@ function StudentDashboard({ user, token }: { user: any; token: string }) {
 
   useEffect(() => {
     Promise.all([
-      getMyEnrollments(token, user.documentId ?? String(user.id), user.id),
-      getLessonProgress(token, user.documentId ?? String(user.id), user.id),
-      getMyQuizSubmissions(token, user.documentId ?? String(user.id), user.id),
+      getMyEnrollments(token, user.id),
+      getLessonProgress(token, user.id),
+      getMyQuizSubmissions(token, user.id),
     ])
       .then(([e, p, s]) => {
         setEnrollments(e);

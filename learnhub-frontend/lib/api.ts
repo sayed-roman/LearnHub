@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 const STRAPI_URL = process.env.NEXT_PUBLIC_STRAPI_URL;
 
 async function handle(res: Response) {
@@ -59,7 +57,7 @@ export async function getCourses(token?: string | null) {
 
 export async function getCourse(documentId: string, token?: string | null) {
   const res = await fetch(
-    `${STRAPI_URL}/api/courses/${documentId}?populate[instructor]=true&populate[lessons]=true&populate[quizzes]=true`,
+    `${STRAPI_URL}/api/courses/${documentId}?populate=instructor,lessons,quizzes`,
     { headers: authHeaders(token) }
   );
   const data = await handle(res);
@@ -136,85 +134,44 @@ export async function deleteLesson(token: string, documentId: string) {
 
 // ---------- Enrollments ----------
 
-export async function enrollInCourse(
-  token: string,
-  courseDocumentId: string,
-  studentDocumentId: string | number
-) {
+export async function enrollInCourse(token: string, courseDocumentId: string, studentId: number) {
   const res = await fetch(`${STRAPI_URL}/api/enrollments`, {
     method: "POST",
     headers: authHeaders(token),
     body: JSON.stringify({
-      data: {
-        course: { connect: [{ documentId: courseDocumentId }] },
-        student: { connect: [{ documentId: String(studentDocumentId) }] },
-        enrolledAt: new Date().toISOString(),
-      },
+      data: { course: courseDocumentId, student: studentId, enrolledAt: new Date().toISOString() },
     }),
   });
   return handle(res);
 }
 
-export async function getMyEnrollments(
-  token: string,
-  studentDocumentId: string,
-  studentId?: number
-) {
+export async function getMyEnrollments(token: string, studentId: number) {
   const res = await fetch(`${STRAPI_URL}/api/enrollments?populate[student]=true&populate[course]=true`, {
     headers: authHeaders(token),
   });
   const data = await handle(res);
-  return data.data.filter((e: any) => {
-    const matchStudent = e.student;
-    return (
-      matchStudent?.documentId === studentDocumentId ||
-      matchStudent?.id === studentId ||
-      matchStudent?.id === Number(studentDocumentId)
-    );
-  });
+  return data.data.filter((e: any) => e.student?.id === studentId);
 }
 
 // ---------- Lesson Progress ----------
 
-export async function getLessonProgress(
-  token: string,
-  studentDocumentId: string,
-  studentId?: number
-) {
+export async function getLessonProgress(token: string, studentId: number) {
   const res = await fetch(
     `${STRAPI_URL}/api/lesson-progresses?populate[student]=true&populate[lesson]=true`,
     { headers: authHeaders(token) }
   );
   const data = await handle(res);
-  return data.data.filter((p: any) => {
-    const matchStudent = p.student;
-    return (
-      matchStudent?.documentId === studentDocumentId ||
-      matchStudent?.id === studentId ||
-      matchStudent?.id === Number(studentDocumentId)
-    );
-  });
+  return data.data.filter((p: any) => p.student?.id === studentId);
 }
 
-export async function markLessonComplete(
-  token: string,
-  studentDocumentId: string,
-  lessonDocumentId: string,
-  studentId?: number
-) {
-  // fetch all progress records with relations populated, then filter client-side
-  // (Strapi v5 has a known issue filtering server-side by relations to the User model)
+export async function markLessonComplete(token: string, studentId: number, lessonDocumentId: string) {
   const res = await fetch(
     `${STRAPI_URL}/api/lesson-progresses?populate[student]=true&populate[lesson]=true`,
     { headers: authHeaders(token) }
   );
   const data = await handle(res);
   const existing = data.data.find(
-    (p: any) =>
-      (p.student?.documentId === studentDocumentId ||
-        p.student?.id === studentId ||
-        p.student?.id === Number(studentDocumentId)) &&
-      p.lesson?.documentId === lessonDocumentId
+    (p: any) => p.student?.id === studentId && p.lesson?.documentId === lessonDocumentId
   );
 
   if (existing) {
@@ -230,8 +187,8 @@ export async function markLessonComplete(
       headers: authHeaders(token),
       body: JSON.stringify({
         data: {
-          student: { connect: [{ documentId: String(studentDocumentId) }] },
-          lesson: { connect: [{ documentId: lessonDocumentId }] },
+          student: studentId,
+          lesson: lessonDocumentId,
           completed: true,
           completedAt: new Date().toISOString(),
         },
@@ -271,7 +228,7 @@ export async function createQuestion(token: string, payload: any) {
 
 export async function submitQuiz(
   token: string,
-  studentDocumentId: string,
+  studentId: number,
   quizDocumentId: string,
   score: number
 ) {
@@ -280,8 +237,8 @@ export async function submitQuiz(
     headers: authHeaders(token),
     body: JSON.stringify({
       data: {
-        student: { connect: [{ documentId: String(studentDocumentId) }] },
-        quiz: { connect: [{ documentId: quizDocumentId }] },
+        student: studentId,
+        quiz: quizDocumentId,
         score,
         submittedAt: new Date().toISOString(),
       },
@@ -290,24 +247,13 @@ export async function submitQuiz(
   return handle(res);
 }
 
-export async function getMyQuizSubmissions(
-  token: string,
-  studentDocumentId: string,
-  studentId?: number
-) {
+export async function getMyQuizSubmissions(token: string, studentId: number) {
   const res = await fetch(
     `${STRAPI_URL}/api/quiz-submissions?populate[student]=true&populate[quiz]=true`,
     { headers: authHeaders(token) }
   );
   const data = await handle(res);
-  return data.data.filter((s: any) => {
-    const matchStudent = s.student;
-    return (
-      matchStudent?.documentId === studentDocumentId ||
-      matchStudent?.id === studentId ||
-      matchStudent?.id === Number(studentDocumentId)
-    );
-  });
+  return data.data.filter((s: any) => s.student?.id === studentId);
 }
 
 // ---------- Blog ----------

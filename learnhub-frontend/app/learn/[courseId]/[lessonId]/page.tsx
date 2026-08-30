@@ -1,7 +1,5 @@
 "use client";
 
-/* eslint-disable @typescript-eslint/no-explicit-any, react-hooks/set-state-in-effect */
-
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
@@ -24,11 +22,7 @@ function LessonViewer({ user, token }: { user: any; token: string }) {
     const c = await getCourse(courseId, token);
     setCourse(c);
     if (user.role?.name === "Student") {
-      const progress = await getLessonProgress(
-        token,
-        user.documentId ?? String(user.id),
-        user.id
-      );
+      const progress = await getLessonProgress(token, user.id);
       setCompletedIds(
         progress.filter((p: any) => p.completed).map((p: any) => p.lesson?.documentId)
       );
@@ -54,7 +48,7 @@ function LessonViewer({ user, token }: { user: any; token: string }) {
   async function handleMarkComplete() {
     setMarking(true);
     try {
-      await markLessonComplete(token, user.documentId ?? String(user.id), lessonId, user.id);
+      await markLessonComplete(token, user.id, lessonId);
       await load();
     } finally {
       setMarking(false);
