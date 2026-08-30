@@ -9,6 +9,7 @@ const config = ({ env }: Core.Config.Shared.ConfigParams): Core.Config.Server =>
   webhooks: {
     populateRelations: env.bool('WEBHOOKS_POPULATE_RELATIONS', false),
   },
+  proxy: env.bool('IS_PROXIED', true),
 });
 
 export default config;
