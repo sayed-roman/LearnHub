@@ -24,4 +24,19 @@ export default {
 
     ctx.body = updatedUser;
   },
+
+  async getMeWithRole(ctx: any) {
+    const requester = ctx.state.user;
+
+    if (!requester) {
+      return ctx.unauthorized('You must be logged in');
+    }
+
+    const fullUser = await strapi.documents('plugin::users-permissions.user').findOne({
+      documentId: requester.documentId,
+      populate: ['role'],
+    });
+
+    ctx.body = fullUser;
+  },
 };

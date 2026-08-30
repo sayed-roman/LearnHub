@@ -8,5 +8,13 @@ export default {
         policies: [],
       },
     },
+    {
+      method: 'GET',
+      path: '/me-with-role',
+      handler: 'user-role.getMeWithRole',
+      config: {
+        policies: [],
+      },
+    },
   ],
 };
